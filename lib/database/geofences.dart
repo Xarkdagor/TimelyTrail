@@ -50,14 +50,3 @@ class Categories {
 
   Categories({required this.name, required this.standardRadius});
 }
-
-@Collection()
-class DailyGeofenceRecord {
-  Id id = Isar.autoIncrement;
-  DateTime? date;
-  int dailyTimeSpentInSeconds = 0;
-  int? geofenceId;
-
-  DailyGeofenceRecord(
-      {this.date, required this.dailyTimeSpentInSeconds, this.geofenceId});
-}

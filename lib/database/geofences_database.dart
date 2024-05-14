@@ -12,9 +12,10 @@ class GeofencesDatabase {
   // Initialization
   static Future<void> initialize() async {
     final dir = await getApplicationDocumentsDirectory();
-    isar = await Isar.open(
-        [GeofencesSchema, CategoriesSchema, DailyGeofenceRecordSchema],
-        directory: dir.path);
+    isar = await Isar.open([
+      GeofencesSchema,
+      CategoriesSchema,
+    ], directory: dir.path);
 
     await ensureCategoriesExist();
   }
@@ -109,20 +110,5 @@ class GeofencesDatabase {
         .findFirst();
 
     return result?.standardRadius;
-  }
-
-  static Future<void> addDailyRecord(DailyGeofenceRecord record) async {
-    await isar.writeTxn(() async {
-      await isar.dailyGeofenceRecords.put(record);
-    });
-  }
-
-  // Example: Read daily records for a specific geofence
-  static Future<List<DailyGeofenceRecord>> readDailyRecordsForGeofence(
-      Geofences geofence) async {
-    return await isar.dailyGeofenceRecords
-        .filter()
-        .geofenceIdEqualTo(geofence.id)
-        .findAll();
   }
 }

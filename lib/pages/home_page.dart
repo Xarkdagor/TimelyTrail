@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = [
     // Home page content (replace with your actual widget)
     HomePageContent(),
+
     const GeofencingPage(),
     const LocationsPage(),
   ];

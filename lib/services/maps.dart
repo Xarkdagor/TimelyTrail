@@ -27,7 +27,7 @@ class _MapsState extends State<Maps> {
     super.initState();
     _getCurrentLocation();
     _fetchGeofencesFromDatabase();
-    _initializeDailyReset();
+
     _loadTimerState();
     if (widget.updateCoordinates != null) {
       _updateCoordinatesCallback = widget.updateCoordinates!;
@@ -39,19 +39,6 @@ class _MapsState extends State<Maps> {
     _timer?.cancel(); // Cancel the timer
     _locationSubscription?.cancel();
     super.dispose();
-  }
-
-  void _initializeDailyReset() {
-    // Calculate time until next midnight
-    DateTime now = DateTime.now();
-    DateTime midnight = DateTime(now.year, now.month, now.day + 1);
-    Duration timeUntilMidnight = midnight.difference(now);
-
-    // Timer to trigger reset at midnight
-    Timer(timeUntilMidnight, () {
-      _resetDailyData();
-      _initializeDailyReset(); // Schedule the reset for the next day
-    });
   }
 
   void _loadTimerState() async {
@@ -71,26 +58,6 @@ class _MapsState extends State<Maps> {
         _startTimer();
       }
     }
-  }
-
-  void _resetDailyData() {
-    for (var geofence in _geofences) {
-      _storeDailyRecord(geofence); // Save the previous day's data
-      geofence.dailyTimeSpentInSeconds = 0; // Reset for the new day
-      GeofencesDatabase.updateGeofence(geofence); // Update in the database
-    }
-  }
-
-  void _storeDailyRecord(Geofences geofence) {
-    DailyGeofenceRecord record =
-        DailyGeofenceRecord(dailyTimeSpentInSeconds: 0);
-
-    // Ensure these values are NOT null before saving:
-    record.date = DateTime.now().subtract(const Duration(days: 1));
-    record.dailyTimeSpentInSeconds = geofence.dailyTimeSpentInSeconds;
-    record.geofenceId = geofence.id;
-
-    GeofencesDatabase.addDailyRecord(record);
   }
 
   Timer? _timer; // The timer for time tracking
@@ -124,7 +91,7 @@ class _MapsState extends State<Maps> {
     }
 
     int readingsCount = 0;
-    double currentThreshold = 100.0; // Start with initialThreshold
+    double currentThreshold = 60.0; // Start with initialThreshold
 
     _locationSubscription =
         FlLocation.getLocationStream().listen((locationData) {
@@ -196,7 +163,8 @@ class _MapsState extends State<Maps> {
     Timer? activeTimer; // To store the active timer
     // Perform actions based on the closest geofence
     if (closestDistance != null &&
-        closestDistance < (closestGeofence!.radius ?? 0.0)) {
+        closestGeofence != null && // Add this null check
+        closestDistance < (closestGeofence.radius ?? 0.0)) {
       // User is inside a geofence.
       if (currentGeofenceId != closestGeofence.id ||
           closestGeofence.entryTimestamp == null) {
