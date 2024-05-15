@@ -6,6 +6,7 @@ import 'package:geo_chronicle/database/geofences.dart';
 import 'package:geo_chronicle/database/geofences_database.dart';
 import 'package:geo_chronicle/pages/geofencing_page.dart';
 import 'package:geo_chronicle/pages/locations_page.dart';
+import 'package:geo_chronicle/pages/schedule_page.dart';
 import 'package:geo_chronicle/utils/bottom_nav_bar.dart';
 import 'package:intl/intl.dart';
 
@@ -28,7 +29,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = [
     // Home page content (replace with your actual widget)
     HomePageContent(),
-
+    SchedulePage(),
     const GeofencingPage(),
     const LocationsPage(),
   ];

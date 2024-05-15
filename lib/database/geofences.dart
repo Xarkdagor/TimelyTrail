@@ -50,3 +50,26 @@ class Categories {
 
   Categories({required this.name, required this.standardRadius});
 }
+
+@Collection()
+class EventModel {
+  Id id = Isar.autoIncrement;
+  String title;
+  int geofenceId;
+  DateTime startTime;
+  DateTime endTime;
+  bool isRecurring;
+  String? recurrenceRule;
+  List<int>? recurrenceDays;
+
+  EventModel({
+    required this.title,
+    this.geofenceId =
+        -1, // Default to -1 (or any other invalid ID) if no geofence
+    required this.startTime,
+    required this.endTime,
+    this.isRecurring = false,
+    this.recurrenceRule,
+    this.recurrenceDays,
+  });
+}

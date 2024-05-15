@@ -71,13 +71,16 @@ class _MapsState extends State<Maps> {
   List<Geofences> _geofences = [];
   bool _showGeofences = false;
   late Function(String) _updateCoordinatesCallback;
+  final Map<int, bool> _isInsideGeofence =
+      {}; // Track entry status for each geofence
 
   void _zoomToCurrentLocation() {
     if (_mapController != null && _currentLocation != null) {
       _mapController!.animateCamera(
         CameraUpdate.newLatLngZoom(
-            LatLng(_currentLocation!.latitude, _currentLocation!.longitude),
-            18.0),
+          LatLng(_currentLocation!.latitude, _currentLocation!.longitude),
+          18.0,
+        ),
       );
     }
   }
@@ -149,33 +152,25 @@ class _MapsState extends State<Maps> {
 
     for (var geofence in _geofences) {
       final distance = haversineDistance(
-          LatLng(locationData.latitude, locationData.longitude),
-          LatLng(geofence.latitude, geofence.longitude));
+        LatLng(locationData.latitude, locationData.longitude),
+        LatLng(geofence.latitude, geofence.longitude),
+      );
       if (closestDistance == null || distance < closestDistance) {
         closestDistance = distance;
         closestGeofence = geofence;
       }
     }
 
-    // State Tracking
-    int? currentGeofenceId; // To track which geofence we're in
-    // Timer Management
-    Timer? activeTimer; // To store the active timer
     // Perform actions based on the closest geofence
     if (closestDistance != null &&
         closestGeofence != null && // Add this null check
         closestDistance < (closestGeofence.radius ?? 0.0)) {
       // User is inside a geofence.
-      if (currentGeofenceId != closestGeofence.id ||
+      if (_isInsideGeofence[closestGeofence.id] != true ||
           closestGeofence.entryTimestamp == null) {
         // New geofence or no entryTimestamp
 
         closestGeofence.entryTimestamp = DateTime.now(); // Record entry time
-
-        // Start the timer (if not already running)
-        activeTimer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
-          closestGeofence!.totalTimeSpentInSeconds++;
-        });
 
         // Debugging: Print statement (conditionally)
         if (closestGeofence.entryTimestamp != null) {
@@ -184,71 +179,59 @@ class _MapsState extends State<Maps> {
           log('Entered Geofence "${closestGeofence.name}" at $formattedEntryTime');
         }
 
-        // Display notification (optional)
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text("You've entered the ${closestGeofence.name}")));
-      }
-      currentGeofenceId = closestGeofence.id;
-      if (!_isTimerActive) {
+        _isInsideGeofence[closestGeofence.id] = true;
         _startTimer();
       }
+
       closestGeofence.sessionTimeSpentInSeconds++;
       _saveTimerState(closestGeofence); // Update session time
     } else {
       // User was inside and has exited or is outside the range
-      try {
-        activeTimer!.cancel();
-        activeTimer = null; // Reset
-      } catch (error) {
-        // Handle the potential error if activeTimer is null
-        // log("Error during timer cancellation: $error");
-      } // Directly cancel the timer
+      if (_isInsideGeofence[closestGeofence!.id] == true) {
+        closestGeofence.exitTimestamp = DateTime.now();
 
-      closestGeofence!.exitTimestamp = DateTime.now();
+        // Debugging: Print statement (conditionally)
+        if (closestGeofence.exitTimestamp != null) {
+          String formattedExitTime = DateFormat('dd-MM-yyyy HH:mm:ss')
+              .format(closestGeofence.exitTimestamp!);
+          log('Exited Geofence "${closestGeofence.name}" at $formattedExitTime');
+        }
 
-      // Debugging: Print statement (conditionally)
-      if (closestGeofence.exitTimestamp != null) {
-        String formattedExitTime = DateFormat('dd-MM-yyyy HH:mm:ss')
-            .format(closestGeofence.exitTimestamp!);
-        log('Exited Geofence "${closestGeofence.name}" at $formattedExitTime');
-      }
+        closestGeofence.totalTimeSpentInSeconds += closestGeofence
+            .sessionTimeSpentInSeconds; // Add session time to total
+        closestGeofence.sessionTimeSpentInSeconds = 0; // Reset session time
 
-      // Notification (optional)
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("You've exited the ${closestGeofence.name}")));
+        GeofencesDatabase.updateGeofence(closestGeofence); // Update in database
 
-      closestGeofence.totalTimeSpentInSeconds += closestGeofence
-          .sessionTimeSpentInSeconds; // Add session time to total
-      closestGeofence.sessionTimeSpentInSeconds = 0; // Reset session time
-
-      GeofencesDatabase.updateGeofence(closestGeofence); // Update in database
-
-      currentGeofenceId = null;
-      if (_isTimerActive) {
+        _isInsideGeofence[closestGeofence.id] = false;
         _stopTimer();
+        _clearTimerState();
       }
-      _clearTimerState();
     }
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _elapsedTime++;
+    if (!_isTimerActive) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        setState(() {
+          _elapsedTime++;
+        });
       });
-    });
-    setState(() {
-      _isTimerActive = true;
-    });
+      setState(() {
+        _isTimerActive = true;
+      });
+    }
   }
 
   void _stopTimer() {
-    _timer?.cancel();
-    _timer = null; // Reset
-    setState(() {
-      _elapsedTime = 0;
-      _isTimerActive = false;
-    });
+    if (_isTimerActive) {
+      _timer?.cancel();
+      _timer = null; // Reset
+      setState(() {
+        _elapsedTime = 0;
+        _isTimerActive = false;
+      });
+    }
   }
 
   void _saveTimerState(Geofences geofence) async {

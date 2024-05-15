@@ -27,6 +27,10 @@ class BottomNavBar extends StatelessWidget {
               text: "Home",
             ),
             GButton(
+              icon: Icons.schedule,
+              text: "Schedule",
+            ),
+            GButton(
               icon: Icons.map,
               text: "Geofencing",
             ),

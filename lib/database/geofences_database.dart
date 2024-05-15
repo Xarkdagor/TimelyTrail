@@ -12,10 +12,9 @@ class GeofencesDatabase {
   // Initialization
   static Future<void> initialize() async {
     final dir = await getApplicationDocumentsDirectory();
-    isar = await Isar.open([
-      GeofencesSchema,
-      CategoriesSchema,
-    ], directory: dir.path);
+    isar = await Isar.open(
+        [GeofencesSchema, CategoriesSchema, EventModelSchema],
+        directory: dir.path);
 
     await ensureCategoriesExist();
   }
@@ -32,11 +31,10 @@ class GeofencesDatabase {
     if (!categoriesExist) {
       await isar.writeTxn(() async {
         await isar.categories
-            .put(Categories(name: "Lecture Hall", standardRadius: 30.0));
+            .put(Categories(name: "Lecture Hall", standardRadius: 25.0));
+
         await isar.categories
-            .put(Categories(name: "Food", standardRadius: 40.0));
-        await isar.categories
-            .put(Categories(name: "Department", standardRadius: 50.0));
+            .put(Categories(name: "Department", standardRadius: 40.0));
         // ... add more categories ...
       });
     }
