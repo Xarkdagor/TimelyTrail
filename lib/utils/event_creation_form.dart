@@ -63,9 +63,8 @@ class EventCreationScreenState extends State<EventCreationScreen> {
   void _saveEvent() async {
     if (_formKey.currentState!.validate()) {
       final eventModel = EventModel(
-        // Use EventModel instead of Event
         title: _titleController.text,
-        geofenceId: _selectedGeofence?.id ?? -1,
+        geofenceId: _selectedGeofence!.id,
         startTime: DateTime(
           widget.selectedDate.year,
           widget.selectedDate.month,
@@ -81,12 +80,13 @@ class EventCreationScreenState extends State<EventCreationScreen> {
           _selectedEndTime.minute,
         ),
         isRecurring: _isRecurring,
-        recurrenceRule: _selectedRecurrenceRule,
+        // Change the RecurrenceRule from String to enum type
+        recurrenceRule: _selectedRecurrenceRule?.toLowerCase(),
         recurrenceDays:
             _selectedRecurrenceDays.isNotEmpty ? _selectedRecurrenceDays : null,
       );
 
-      // Assuming you have an Isar instance available. If not, you need to initialize it first
+      // Save the EventModel to Isar database
       await GeofencesDatabase.isar.writeTxn(() async {
         await GeofencesDatabase.isar.eventModels.put(eventModel);
       });

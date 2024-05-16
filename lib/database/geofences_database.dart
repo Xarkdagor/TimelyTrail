@@ -24,6 +24,54 @@ class GeofencesDatabase {
     await isar.close();
   }
 
+  static Future<void> addPredefinedGeofences() async {
+    List<Geofences> predefinedGeofences = [
+      Geofences(
+        name: "Home",
+        latitude: 28.6382947, // Replace with actual coordinates
+        longitude: 77.2091844,
+        color: Colors.red.value,
+        dailyTimeSpentInSeconds: 0,
+        category: "Department",
+      ),
+      Geofences(
+        name: "Work",
+        latitude: 28.6139391,
+        longitude: 77.2090212,
+        color: Colors.green.value,
+        dailyTimeSpentInSeconds: 0,
+        category: "Food",
+      ),
+      Geofences(
+        name: "Gym",
+        latitude: 28.612912,
+        longitude: 77.209023,
+        color: Colors.blue.value,
+        dailyTimeSpentInSeconds: 0,
+        category: null,
+        radius: 30, // Add radius if it's a required field
+      ),
+    ];
+
+    try {
+      await isar.writeTxn(() async {
+        for (var geofence in predefinedGeofences) {
+          // Check if a geofence with the same name already exists
+          if ((await isar.geofences
+                  .filter()
+                  .nameEqualTo(geofence.name)
+                  .findFirst()) ==
+              null) {
+            await isar.geofences.put(geofence); // Put if not exists
+          }
+        }
+      });
+    } catch (e) {
+      // Handle errors, e.g., by logging or displaying a message
+      print('Error adding predefined geofences: $e');
+    }
+  }
+
   static Future<void> ensureCategoriesExist() async {
     // Check if the categories collection is empty
     bool categoriesExist = await isar.categories.where().count() > 0;
