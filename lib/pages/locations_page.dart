@@ -77,7 +77,10 @@ class _LocationsPageState extends State<LocationsPage> {
                 final tileColor = tileColors[index % tileColors.length];
                 return Padding(
                   padding: const EdgeInsets.only(
-                      left: 20.0, right: 20, top: 20, bottom: 10),
+                    left: 40.0,
+                    right: 40,
+                    top: 8,
+                  ),
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(

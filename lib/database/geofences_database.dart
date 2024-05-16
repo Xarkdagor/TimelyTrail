@@ -27,7 +27,7 @@ class GeofencesDatabase {
   static Future<void> addPredefinedGeofences() async {
     List<Geofences> predefinedGeofences = [
       Geofences(
-        name: "Home",
+        name: "LHC",
         latitude: 28.6382947, // Replace with actual coordinates
         longitude: 77.2091844,
         color: Colors.red.value,
@@ -35,7 +35,7 @@ class GeofencesDatabase {
         category: "Department",
       ),
       Geofences(
-        name: "Work",
+        name: "L-Block",
         latitude: 28.6139391,
         longitude: 77.2090212,
         color: Colors.green.value,

@@ -43,7 +43,7 @@ class Event {
     );
   }
 
-// Helper method to get the correct RecurrenceRule from the string value in EventModel
+  // Helper method to get the correct RecurrenceRule from the string value in EventModel
   RecurrenceRule _getRecurrenceRule(String? ruleName) {
     switch (ruleName) {
       case 'daily':

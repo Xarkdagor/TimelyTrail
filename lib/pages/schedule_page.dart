@@ -3,6 +3,7 @@ import 'package:geo_chronicle/database/geofences.dart';
 import 'package:geo_chronicle/database/geofences_database.dart';
 import 'package:geo_chronicle/utils/event.dart';
 import 'package:geo_chronicle/utils/event_creation_form.dart';
+import 'package:geo_chronicle/utils/types.dart';
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -38,7 +39,6 @@ class _SchedulePageState extends State<SchedulePage> {
   Future<Map<DateTime, List<Event>>> _loadEvents() async {
     final isar = GeofencesDatabase.isar;
     final eventsFromDatabase = await isar.eventModels.where().findAll();
-
     return _groupEventsByDay(eventsFromDatabase
         .map((eventModel) => Event.fromModel(eventModel))
         .toList());
@@ -46,23 +46,79 @@ class _SchedulePageState extends State<SchedulePage> {
 
   Map<DateTime, List<Event>> _groupEventsByDay(List<Event> events) {
     Map<DateTime, List<Event>> groupedEvents = {};
+    DateTime today = DateTime.now().toUtc().subtract(const Duration(days: 1));
+
     for (final event in events) {
-      final date = DateTime.utc(
-          event.startTime.year, event.startTime.month, event.startTime.day);
-      groupedEvents.update(
-        date,
-        (existingEvents) => List.from(existingEvents)..add(event),
-        ifAbsent: () => [event],
-      );
+      if (event.isRecurring) {
+        DateTime eventStartDate = event.startTime.toUtc();
+        while (eventStartDate
+            .isBefore(_focusedDay.add(const Duration(days: 365)))) {
+          if (_shouldAddEventOnDate(eventStartDate, event) &&
+              !eventStartDate.isBefore(today)) {
+            groupedEvents.update(
+              DateTime.utc(eventStartDate.year, eventStartDate.month,
+                  eventStartDate.day),
+              (existingEvents) => List.from(existingEvents)..add(event),
+              ifAbsent: () => [event],
+            );
+          }
+          eventStartDate =
+              _getNextRecurrenceDate(eventStartDate, event.recurrenceRule);
+        }
+      } else {
+        final eventDate = DateTime.utc(
+            event.startTime.year, event.startTime.month, event.startTime.day);
+        if (eventDate.month == _focusedDay.month &&
+            eventDate.year == _focusedDay.year) {
+          groupedEvents.update(
+            eventDate,
+            (existingEvents) => List.from(existingEvents)..add(event),
+            ifAbsent: () => [event],
+          );
+        }
+      }
     }
     return groupedEvents;
+  }
+
+  DateTime _getNextRecurrenceDate(DateTime date, RecurrenceRule rule) {
+    switch (rule) {
+      case RecurrenceRule.daily:
+        return date.add(const Duration(days: 1));
+      case RecurrenceRule.weekly:
+        return date.add(const Duration(days: 7));
+      default:
+        return date.add(const Duration(days: 1));
+    }
+  }
+
+  bool _shouldAddEventOnDate(DateTime date, Event event) {
+    if (!event.isRecurring) return false;
+    switch (event.recurrenceRule) {
+      case RecurrenceRule.daily:
+        return true;
+      case RecurrenceRule.weekly:
+        return event.recurrenceDays!.contains(date.weekday);
+      case RecurrenceRule.monthly:
+        return event.startTime.day == date.day;
+      case RecurrenceRule.custom:
+        return (event.recurrenceDays ?? []).contains(date.weekday);
+      default:
+        return false;
+    }
   }
 
   List<Event> _getEventsForDay(DateTime day) {
     return _events[day] ?? [];
   }
 
-  // Function to navigate to EventCreationScreen when FAB is pressed
+  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+    setState(() {
+      _selectedDay = selectedDay;
+      _focusedDay = focusedDay;
+    });
+  }
+
   void _createNewEvent() async {
     final result = await Navigator.push(
       context,
@@ -74,63 +130,9 @@ class _SchedulePageState extends State<SchedulePage> {
       ),
     );
     if (result != null && result is Event) {
-      _loadEvents(); // Reload events after creating a new one
+      _loadEvents();
     }
   }
-
-  // Function to update selectedDay and focusedDay
-  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    setState(() {
-      _selectedDay = selectedDay;
-      _focusedDay = focusedDay;
-    });
-  }
-
-  void _addRecurringEventDaily(DateTime startDate, Event event) {
-    for (int i = 0; i < 7; i++) {
-      DateTime date = startDate.add(Duration(days: i));
-      _events.update(
-        date,
-        (existingEvents) => List.from(existingEvents)..add(event),
-        ifAbsent: () => [event],
-      );
-    }
-  }
-
-  void _addRecurringEventWeekly(DateTime startDate, Event event) {
-    for (int dayOfWeek in event.recurrenceDays ?? []) {
-      DateTime recurringDate = _findNextDay(startDate, dayOfWeek);
-
-      _events.update(
-        recurringDate,
-        (existingEvents) => List.from(existingEvents)..add(event),
-        ifAbsent: () => [event],
-      );
-    }
-  }
-
-  DateTime _findNextDay(DateTime startDate, int dayOfWeek) {
-    while (startDate.weekday != dayOfWeek) {
-      startDate = startDate.add(const Duration(days: 1));
-    }
-    return startDate;
-  }
-
-  void _addRecurringEventCustom(DateTime startDate, Event event) {
-    for (int dayOfWeek in event.recurrenceDays ?? []) {
-      DateTime recurringDate = startDate;
-      while (recurringDate.weekday != dayOfWeek) {
-        recurringDate = recurringDate.add(const Duration(days: 1));
-      }
-      _events.update(
-        recurringDate,
-        (existingEvents) => List.from(existingEvents)..add(event),
-        ifAbsent: () => [event],
-      );
-    }
-  }
-
-  // Function to navigate to EventCreationScreen when FAB is pressed
 
   @override
   Widget build(BuildContext context) {
@@ -200,44 +202,65 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  List<Color> tileColors = [
-    Colors.blue[100]!,
-    Colors.teal[100]!,
-    Colors.green[100]!,
-    Colors.amber[100]!,
-    // ... more colors as needed
-  ];
-
   Widget _buildEventList(DateTime day) {
     List<Event> events = _getEventsForDay(day);
+
     return ListView.builder(
       itemCount: events.length,
       itemBuilder: (context, index) {
         final event = events[index];
-        final tileColor = tileColors[index % tileColors.length];
+        final tileColor = _getTileColor(index);
+
         return Padding(
-          padding: const EdgeInsets.only(top: 6, left: 6, right: 15),
-          child: Card(
-            color: tileColor, // Apply the tile color to the Card
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                  10.0), // Adjust the value to change the border radius
+          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: tileColor,
+              borderRadius: BorderRadius.circular(8.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  spreadRadius: 1,
+                  blurRadius: 3,
+                  offset: const Offset(0, 1),
+                ),
+              ],
             ),
             child: ListTile(
-              title: Text(event.title),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                      'Start Time: ${DateFormat.jm().format(event.startTime)}'),
-                  Text('End Time: ${DateFormat.jm().format(event.endTime)}'),
-                ],
+              title: Text(
+                event.title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Start: ${DateFormat.jm().format(event.startTime)}'),
+                    Text('End: ${DateFormat.jm().format(event.endTime)}'),
+                  ],
+                ),
+              ),
+              trailing: event.isRecurring ? const Icon(Icons.repeat) : null,
             ),
           ),
         );
       },
     );
+  }
+
+  Color _getTileColor(int index) {
+    List<Color> tileColors = [
+      Colors.blue[100]!,
+      Colors.teal[100]!,
+      Colors.green[100]!,
+      Colors.amber[100]!,
+      // Add more colors as needed
+    ];
+
+    return tileColors[index % tileColors.length];
   }
 
   Widget _buildEventMarker(int eventCount) {
@@ -247,14 +270,14 @@ class _SchedulePageState extends State<SchedulePage> {
       margin: const EdgeInsets.symmetric(horizontal: 0.3),
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.blue,
+        color: Color.fromARGB(255, 120, 217, 88),
       ),
       child: Center(
         child: Text(
           '$eventCount',
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 8,
+            fontSize: 6,
           ),
         ),
       ),
