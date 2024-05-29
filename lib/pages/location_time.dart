@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:geo_chronicle/database/geofences.dart';
+import 'package:geo_chronicle/database/geofences_database.dart';
+import 'package:geo_chronicle/pages/event_details_page.dart';
 import 'package:intl/intl.dart';
 
 class LocationTime extends StatelessWidget {
@@ -25,86 +27,103 @@ class LocationTime extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Location Time"),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: geofences.map((geofence) {
-            final tileColor =
-                tileColors[geofences.indexOf(geofence) % tileColors.length];
-            return Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15),
-              child: Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: tileColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      geofence.name,
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      // For "First Entry" with icon
-                      children: [
-                        const Icon(Icons.access_time_rounded,
-                            size: 20), // Clock icon
-                        const SizedBox(width: 8),
-                        Text(
-                          'Entry: ${geofence.entryTimestamp != null ? DateFormat('dd-MM-yyyy HH:mm:ss').format(geofence.entryTimestamp!) : 'Not Entered Yet'}',
-                          style: const TextStyle(fontWeight: FontWeight.w500),
+        child: geofences.isEmpty
+            ? const Center(child: Text("No locations visited yet."))
+            : ListView.builder(
+                itemCount: geofences.length,
+                itemBuilder: (context, index) {
+                  final geofence = geofences[index];
+                  final tileColor = tileColors[index % tileColors.length];
+                  final punctuality =
+                      punctualityPercentagePerGeofence[geofence.name] ?? 0.0;
+
+                  return InkWell(
+                    onTap: () async {
+                      try {
+                        final events =
+                            await GeofencesDatabase.getEventsForGeofence(
+                                geofence.id);
+                        if (events.isNotEmpty) {
+                          // Navigate to the EventDetailsPage with the first event
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  EventDetailsPage(event: events.first),
+                            ),
+                          );
+                        } else {
+                          // Handle case where there are no events for this geofence
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('No events found for this geofence')),
+                          );
+                        }
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error loading events: $e')),
+                        );
+                      }
+                    },
+                    child: Card(
+                      color: tileColor,
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 16),
+                      child: ListTile(
+                        title: Text(geofence.name),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Pass the correct argument types to _buildTimeRow
+                            _buildTimeRow(
+                                "Entry Time:", geofence.entryTimestamp),
+                            _buildTimeRow("Exit Time:", geofence.exitTimestamp),
+                            _buildTimeRow(
+                                "Total Time:",
+                                geofence
+                                    .totalTimeSpentInSeconds), // Pass int for totalTimeSpentInSeconds
+                            _buildPunctualityRow(punctuality),
+                          ],
                         ),
-                      ],
-                    ),
-                    if (geofence.exitTimestamp != null)
-                      Row(
-                        // For "Last Exit" with icon
-                        children: [
-                          const Icon(Icons.exit_to_app_rounded,
-                              size: 20), // Exit icon
-                          const SizedBox(width: 8),
-                          Text(
-                            'Exit: ${DateFormat('dd-MM-yyyy   HH:mm:ss').format(geofence.exitTimestamp!)}',
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                          ),
-                        ],
                       ),
-                    const SizedBox(height: 8),
-                    Row(
-                      // For "Total Time Today" with icon
-                      children: [
-                        const Icon(Icons.watch_later_rounded,
-                            size: 18), // Time icon
-                        const SizedBox(width: 8),
-                        Text(
-                          geofence.getFormattedDailyDuration(),
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ],
                     ),
-                    // Add Punctuality Percentage for each geofence
-                    Row(
-                      children: [
-                        const Icon(Icons.school_rounded, size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Punctuality: ${punctualityPercentagePerGeofence[geofence.name]?.toStringAsFixed(2) ?? '0.00'}%',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
-            );
-          }).toList(),
-        ),
       ),
+    );
+  }
+
+  // Helper function to format time
+  Widget _buildTimeRow(String label, dynamic timeValue) {
+    // Use dynamic for flexibility
+    String timeString;
+    if (timeValue is DateTime) {
+      timeString = DateFormat('dd MMM yyyy, HH:mm:ss').format(timeValue);
+    } else if (timeValue is int) {
+      timeString = '${timeValue ~/ 60} mins'; // Convert seconds to minutes
+    } else {
+      timeString = "N/A";
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Text("$label $timeString"),
+    );
+  }
+
+// Helper function to format time
+
+// Helper function to format punctuality
+  Widget _buildPunctualityRow(double percentage) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Text("Punctuality: ${percentage.toStringAsFixed(2)}%"),
     );
   }
 }

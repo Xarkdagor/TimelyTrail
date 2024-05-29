@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geo_chronicle/database/geofences.dart';
 import 'package:geo_chronicle/database/geofences_database.dart';
+import 'package:geo_chronicle/pages/datagrid.dart';
 import 'package:intl/intl.dart';
 
 class EventCreationScreen extends StatefulWidget {
@@ -107,6 +108,7 @@ class EventCreationScreenState extends State<EventCreationScreen> {
           padding: const EdgeInsets.all(16.0),
           child: SingleChildScrollView(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Title TextFormField
@@ -300,14 +302,99 @@ class EventCreationScreenState extends State<EventCreationScreen> {
                     ],
                   ),
                 const SizedBox(
-                  height: 20,
+                  height: 40,
                 ),
 
                 // Save Button
-                ElevatedButton(
-                  onPressed: _saveEvent,
-                  child: const Text('Save Event'),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _saveEvent,
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: const Color.fromARGB(255, 66, 93, 201),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10.0), // rounded corners
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 5), // padding
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: Text(
+                        "Save Event",
+                        style: TextStyle(
+                          fontSize: 14, // text size
+                          fontWeight: FontWeight.bold, // text weight
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
+
+                const SizedBox(
+                  height: 50,
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Divider(
+                          thickness: 1.0,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                        child: Text(
+                          " OR ",
+                          style: TextStyle(
+                              color: Colors.grey[800],
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(
+                          thickness: 1.0,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 50,
+                ),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SpreadSheet())),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: const Color.fromARGB(255, 66, 93, 201),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(10.0), // rounded corners
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 5), // padding
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: Text(
+                        "View/Edit Schedule",
+                        style: TextStyle(
+                          fontSize: 16, // text size
+                          fontWeight: FontWeight.bold, // text weight
+                        ),
+                      ),
+                    ),
+                  ),
+                )
               ],
             ),
           ),

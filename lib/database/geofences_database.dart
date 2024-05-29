@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:geo_chronicle/database/geofences.dart';
+import 'package:geo_chronicle/utils/event.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -68,8 +69,50 @@ class GeofencesDatabase {
       });
     } catch (e) {
       // Handle errors, e.g., by logging or displaying a message
-      print('Error adding predefined geofences: $e');
+      log('Error adding predefined geofences: $e');
     }
+  }
+
+  // to delete event
+  static Future<void> deleteEvent(int eventId) async {
+    await isar.writeTxn(() async {
+      await isar.eventModels.delete(eventId);
+    });
+  }
+
+  // Method to get all events for a geofence
+  static Future<List<Event>> getEventsForGeofence(int geofenceId) async {
+    return await isar.eventModels
+        .filter()
+        .geofenceIdEqualTo(geofenceId)
+        .findAll()
+        .then((eventModels) =>
+            eventModels.map((e) => Event.fromModel(e)).toList());
+  }
+
+  // Method to update an event's punctuality
+  // Method to update an event's punctuality
+  static Future<void> updateEventPunctuality(
+      int eventId, DateTime? entryTime) async {
+    return await isar.writeTxn(() async {
+      final eventModel = await isar.eventModels.get(eventId);
+      if (eventModel != null) {
+        final event = Event.fromModel(eventModel);
+        event.entryTime = entryTime;
+        event.updatePunctuality();
+
+        // Update the eventModel in the database (without the id parameter)
+        await isar.eventModels.put(EventModel(
+          title: event.title,
+          geofenceId: event.geofenceId,
+          startTime: event.startTime,
+          endTime: event.endTime,
+          isRecurring: event.isRecurring,
+          recurrenceRule: event.recurrenceRule.toString(),
+          recurrenceDays: event.recurrenceDays,
+        ));
+      }
+    });
   }
 
   static Future<void> ensureCategoriesExist() async {

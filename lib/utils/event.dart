@@ -1,17 +1,24 @@
+import 'dart:developer';
+
 import 'package:geo_chronicle/database/geofences.dart';
 import 'package:geo_chronicle/utils/types.dart';
+import 'package:isar/isar.dart';
 
 class Event {
+  int id; // Add an ID field
   final String title;
-  final int
-      geofenceId; // You might want to change this to a more general location identifier if you're removing geofences
+  final int geofenceId;
   final DateTime startTime;
   final DateTime endTime;
   final bool isRecurring;
   final RecurrenceRule recurrenceRule;
   final List<int>? recurrenceDays;
+  DateTime? entryTime; // Actual entry time (nullable)
+  PunctualityStatus punctuality = PunctualityStatus.notArrived; // Default
 
+  // Constructor
   Event({
+    this.id = Isar.autoIncrement,
     required this.title,
     required this.geofenceId,
     required this.startTime,
@@ -19,9 +26,17 @@ class Event {
     this.isRecurring = false,
     this.recurrenceRule = RecurrenceRule.none,
     this.recurrenceDays,
-  });
+    this.entryTime,
+  }) {
+    // Validate start and end times
+    if (startTime.isAfter(endTime)) {
+      throw ArgumentError('Start time cannot be after end time.');
+    }
+  }
 
-  // Factory constructor to create an Event from an EventModel
+  // Factory constructor from EventModel (existing code, no changes)
+  // ...
+
   factory Event.fromModel(EventModel model) {
     RecurrenceRule recurrenceRule = RecurrenceRule.none; // Default value
     if (model.recurrenceRule != null) {
@@ -29,7 +44,7 @@ class Event {
         recurrenceRule = RecurrenceRule.values.byName(model.recurrenceRule!);
       } catch (e) {
         // Handle the case where recurrenceRule is not found in the enum
-        print('Invalid recurrenceRule: ${model.recurrenceRule}');
+        log('Invalid recurrenceRule: ${model.recurrenceRule}');
       }
     }
     return Event(
@@ -43,19 +58,24 @@ class Event {
     );
   }
 
-  // Helper method to get the correct RecurrenceRule from the string value in EventModel
-  RecurrenceRule _getRecurrenceRule(String? ruleName) {
-    switch (ruleName) {
-      case 'daily':
-        return RecurrenceRule.daily;
-      case 'weekly':
-        return RecurrenceRule.weekly;
-      case 'monthly':
-        return RecurrenceRule.monthly;
-      case 'custom':
-        return RecurrenceRule.custom;
-      default:
-        return RecurrenceRule.none; // Handle null or unknown values
+  // Add a method to update punctuality
+  void updatePunctuality() {
+    if (entryTime == null) {
+      punctuality = PunctualityStatus.notArrived;
+    } else if (entryTime!.isBefore(startTime)) {
+      punctuality = PunctualityStatus.early;
+    } else if (entryTime!.isAfter(startTime)) {
+      punctuality = PunctualityStatus.late;
+    } else {
+      punctuality = PunctualityStatus.onTime;
     }
   }
+}
+
+// Enum for punctuality status
+enum PunctualityStatus {
+  early,
+  onTime,
+  late,
+  notArrived, // For events that haven't started yet
 }

@@ -143,7 +143,7 @@ class _MapsState extends State<Maps> {
 
   // Import for date formatting
 // for important function
-  void _checkGeoFence(Location? locationData) {
+  void _checkGeoFence(Location? locationData) async {
     if (locationData == null) return;
 
     // Find the closest geofence (adjust the logic if needed)
@@ -163,20 +163,29 @@ class _MapsState extends State<Maps> {
 
     // Perform actions based on the closest geofence
     if (closestDistance != null &&
-        closestGeofence != null && // Add this null check
+        closestGeofence != null &&
         closestDistance < (closestGeofence.radius ?? 0.0)) {
-      // User is inside a geofence.
-      if (_isInsideGeofence[closestGeofence.id] != true ||
-          closestGeofence.entryTimestamp == null) {
-        // New geofence or no entryTimestamp
+      // User is inside a geofence
 
-        closestGeofence.entryTimestamp = DateTime.now(); // Record entry time
+      if (_isInsideGeofence[closestGeofence.id] != true) {
+        // New geofence entry
 
-        // Debugging: Print statement (conditionally)
-        if (closestGeofence.entryTimestamp != null) {
-          String formattedEntryTime = DateFormat('dd-MM-yyyy HH:mm:ss')
-              .format(closestGeofence.entryTimestamp!);
-          log('Entered Geofence "${closestGeofence.name}" at $formattedEntryTime');
+        closestGeofence.entryTimestamp = DateTime.now();
+
+        // Fetch events for the geofence
+        final events =
+            await GeofencesDatabase.getEventsForGeofence(closestGeofence.id);
+        for (final event in events) {
+          // Check if the current time falls within the event's start and end times
+          if (DateTime.now().isAfter(event.startTime) &&
+              DateTime.now().isBefore(event.endTime)) {
+            // User entered during a scheduled event
+            final isOnTime = DateTime.now().isBefore(event.startTime);
+            await GeofencesDatabase.updateEventPunctuality(
+                event.id, closestGeofence.entryTimestamp);
+            log('Updated punctuality for event "${event.title}": $isOnTime');
+            break; // Assuming only one event at a time
+          }
         }
 
         _isInsideGeofence[closestGeofence.id] = true;
@@ -184,10 +193,11 @@ class _MapsState extends State<Maps> {
       }
 
       closestGeofence.sessionTimeSpentInSeconds++;
-      _saveTimerState(closestGeofence); // Update session time
+      _saveTimerState(closestGeofence);
     } else {
       // User was inside and has exited or is outside the range
-      if (_isInsideGeofence[closestGeofence!.id] == true) {
+      if (_isInsideGeofence[closestGeofence!.id] == true &&
+          closestGeofence.entryTimestamp != null) {
         closestGeofence.exitTimestamp = DateTime.now();
 
         // Debugging: Print statement (conditionally)

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:geo_chronicle/database/geofences.dart';
 import 'package:geo_chronicle/database/geofences_database.dart';
@@ -204,51 +206,120 @@ class _SchedulePageState extends State<SchedulePage> {
 
   Widget _buildEventList(DateTime day) {
     List<Event> events = _getEventsForDay(day);
+    events.sort((a, b) => a.startTime.compareTo(b.startTime));
 
-    return ListView.builder(
-      itemCount: events.length,
-      itemBuilder: (context, index) {
-        final event = events[index];
-        final tileColor = _getTileColor(index);
+    return events.isEmpty
+        ? const Center(child: Text('No events for this day'))
+        : ListView.builder(
+            itemCount: events.length,
+            itemBuilder: (context, index) {
+              final event = events[index];
+              final tileColor = _getTileColor(index);
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: tileColor,
-              borderRadius: BorderRadius.circular(8.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  spreadRadius: 1,
-                  blurRadius: 3,
-                  offset: const Offset(0, 1),
+              return InkWell(
+                  // Wrap ListTile in Dismissible for swipe-to-delete
+                  child: Dismissible(
+                key: UniqueKey(), // Unique key for Dismissible
+                onDismissed: (direction) {
+                  // Show a confirmation dialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text("Confirm Delete"),
+                        content: const Text(
+                            "Are you sure you want to delete this event?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(false); // Don't delete
+                              setState(() {
+                                events.insert(
+                                    index, event); // Reinsert the event
+                              });
+                            },
+                            child: const Text("No"),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(true); // Confirm delete
+                              // Delete the event
+                              _deleteEvent(event.id);
+                              setState(() {
+                                events.removeAt(index); // Remove from the list
+                              });
+                            },
+                            child: const Text("Yes"),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 4.0, horizontal: 8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: tileColor,
+                      borderRadius: BorderRadius.circular(8.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.2),
+                          spreadRadius: 1,
+                          blurRadius: 3,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: ListTile(
+                      title: Text(
+                        event.title,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                                'Start: ${DateFormat.jm().format(event.startTime)}'),
+                            Text(
+                                'End: ${DateFormat.jm().format(event.endTime)}'),
+                          ],
+                        ),
+                      ),
+                      trailing:
+                          event.isRecurring ? const Icon(Icons.repeat) : null,
+                    ),
+                  ),
                 ),
-              ],
-            ),
-            child: ListTile(
-              title: Text(
-                event.title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Start: ${DateFormat.jm().format(event.startTime)}'),
-                    Text('End: ${DateFormat.jm().format(event.endTime)}'),
-                  ],
-                ),
-              ),
-              trailing: event.isRecurring ? const Icon(Icons.repeat) : null,
-            ),
-          ),
-        );
-      },
-    );
+              ));
+            },
+          );
+  }
+
+  void _deleteEvent(int eventId) async {
+    try {
+      await GeofencesDatabase.deleteEvent(eventId); // Await the deletion
+
+      // Show a SnackBar confirming deletion
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Event deleted successfully!')),
+      );
+
+      // Await the loading of events
+      _events = await _loadEvents();
+
+      // Rebuild the UI after the events are loaded
+      setState(() {});
+    } catch (e) {
+      // Handle potential errors
+      log('Error deleting event: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to delete event.')),
+      );
+    }
   }
 
   Color _getTileColor(int index) {
