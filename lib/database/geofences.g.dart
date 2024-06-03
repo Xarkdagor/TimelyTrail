@@ -27,48 +27,43 @@ const GeofencesSchema = CollectionSchema(
       name: r'color',
       type: IsarType.long,
     ),
-    r'dailyTimeSpentInSeconds': PropertySchema(
-      id: 2,
-      name: r'dailyTimeSpentInSeconds',
-      type: IsarType.long,
-    ),
     r'entryTimestamp': PropertySchema(
-      id: 3,
+      id: 2,
       name: r'entryTimestamp',
       type: IsarType.dateTime,
     ),
     r'exitTimestamp': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'exitTimestamp',
       type: IsarType.dateTime,
     ),
     r'latitude': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'latitude',
       type: IsarType.double,
     ),
     r'longitude': PropertySchema(
-      id: 6,
+      id: 5,
       name: r'longitude',
       type: IsarType.double,
     ),
     r'name': PropertySchema(
-      id: 7,
+      id: 6,
       name: r'name',
       type: IsarType.string,
     ),
     r'radius': PropertySchema(
-      id: 8,
+      id: 7,
       name: r'radius',
       type: IsarType.double,
     ),
     r'sessionTimeSpentInSeconds': PropertySchema(
-      id: 9,
+      id: 8,
       name: r'sessionTimeSpentInSeconds',
       type: IsarType.long,
     ),
     r'totalTimeSpentInSeconds': PropertySchema(
-      id: 10,
+      id: 9,
       name: r'totalTimeSpentInSeconds',
       type: IsarType.long,
     )
@@ -111,15 +106,14 @@ void _geofencesSerialize(
 ) {
   writer.writeString(offsets[0], object.category);
   writer.writeLong(offsets[1], object.color);
-  writer.writeLong(offsets[2], object.dailyTimeSpentInSeconds);
-  writer.writeDateTime(offsets[3], object.entryTimestamp);
-  writer.writeDateTime(offsets[4], object.exitTimestamp);
-  writer.writeDouble(offsets[5], object.latitude);
-  writer.writeDouble(offsets[6], object.longitude);
-  writer.writeString(offsets[7], object.name);
-  writer.writeDouble(offsets[8], object.radius);
-  writer.writeLong(offsets[9], object.sessionTimeSpentInSeconds);
-  writer.writeLong(offsets[10], object.totalTimeSpentInSeconds);
+  writer.writeDateTime(offsets[2], object.entryTimestamp);
+  writer.writeDateTime(offsets[3], object.exitTimestamp);
+  writer.writeDouble(offsets[4], object.latitude);
+  writer.writeDouble(offsets[5], object.longitude);
+  writer.writeString(offsets[6], object.name);
+  writer.writeDouble(offsets[7], object.radius);
+  writer.writeLong(offsets[8], object.sessionTimeSpentInSeconds);
+  writer.writeLong(offsets[9], object.totalTimeSpentInSeconds);
 }
 
 Geofences _geofencesDeserialize(
@@ -131,17 +125,16 @@ Geofences _geofencesDeserialize(
   final object = Geofences(
     category: reader.readStringOrNull(offsets[0]),
     color: reader.readLong(offsets[1]),
-    dailyTimeSpentInSeconds: reader.readLong(offsets[2]),
-    entryTimestamp: reader.readDateTimeOrNull(offsets[3]),
-    exitTimestamp: reader.readDateTimeOrNull(offsets[4]),
-    latitude: reader.readDouble(offsets[5]),
-    longitude: reader.readDouble(offsets[6]),
-    name: reader.readString(offsets[7]),
-    radius: reader.readDoubleOrNull(offsets[8]),
+    entryTimestamp: reader.readDateTimeOrNull(offsets[2]),
+    exitTimestamp: reader.readDateTimeOrNull(offsets[3]),
+    latitude: reader.readDouble(offsets[4]),
+    longitude: reader.readDouble(offsets[5]),
+    name: reader.readString(offsets[6]),
+    radius: reader.readDoubleOrNull(offsets[7]),
   );
   object.id = id;
-  object.sessionTimeSpentInSeconds = reader.readLong(offsets[9]);
-  object.totalTimeSpentInSeconds = reader.readLong(offsets[10]);
+  object.sessionTimeSpentInSeconds = reader.readLong(offsets[8]);
+  object.totalTimeSpentInSeconds = reader.readLong(offsets[9]);
   return object;
 }
 
@@ -157,22 +150,20 @@ P _geofencesDeserializeProp<P>(
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 3:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 4:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 5:
       return (reader.readDouble(offset)) as P;
     case 6:
-      return (reader.readDouble(offset)) as P;
-    case 7:
       return (reader.readString(offset)) as P;
-    case 8:
+    case 7:
       return (reader.readDoubleOrNull(offset)) as P;
-    case 9:
+    case 8:
       return (reader.readLong(offset)) as P;
-    case 10:
+    case 9:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -463,62 +454,6 @@ extension GeofencesQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'color',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Geofences, Geofences, QAfterFilterCondition>
-      dailyTimeSpentInSecondsEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'dailyTimeSpentInSeconds',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Geofences, Geofences, QAfterFilterCondition>
-      dailyTimeSpentInSecondsGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'dailyTimeSpentInSeconds',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Geofences, Geofences, QAfterFilterCondition>
-      dailyTimeSpentInSecondsLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'dailyTimeSpentInSeconds',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Geofences, Geofences, QAfterFilterCondition>
-      dailyTimeSpentInSecondsBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'dailyTimeSpentInSeconds',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1205,20 +1140,6 @@ extension GeofencesQuerySortBy on QueryBuilder<Geofences, Geofences, QSortBy> {
     });
   }
 
-  QueryBuilder<Geofences, Geofences, QAfterSortBy>
-      sortByDailyTimeSpentInSeconds() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dailyTimeSpentInSeconds', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Geofences, Geofences, QAfterSortBy>
-      sortByDailyTimeSpentInSecondsDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dailyTimeSpentInSeconds', Sort.desc);
-    });
-  }
-
   QueryBuilder<Geofences, Geofences, QAfterSortBy> sortByEntryTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'entryTimestamp', Sort.asc);
@@ -1343,20 +1264,6 @@ extension GeofencesQuerySortThenBy
   QueryBuilder<Geofences, Geofences, QAfterSortBy> thenByColorDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'color', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Geofences, Geofences, QAfterSortBy>
-      thenByDailyTimeSpentInSeconds() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dailyTimeSpentInSeconds', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Geofences, Geofences, QAfterSortBy>
-      thenByDailyTimeSpentInSecondsDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dailyTimeSpentInSeconds', Sort.desc);
     });
   }
 
@@ -1488,13 +1395,6 @@ extension GeofencesQueryWhereDistinct
     });
   }
 
-  QueryBuilder<Geofences, Geofences, QDistinct>
-      distinctByDailyTimeSpentInSeconds() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'dailyTimeSpentInSeconds');
-    });
-  }
-
   QueryBuilder<Geofences, Geofences, QDistinct> distinctByEntryTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'entryTimestamp');
@@ -1564,13 +1464,6 @@ extension GeofencesQueryProperty
   QueryBuilder<Geofences, int, QQueryOperations> colorProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'color');
-    });
-  }
-
-  QueryBuilder<Geofences, int, QQueryOperations>
-      dailyTimeSpentInSecondsProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'dailyTimeSpentInSeconds');
     });
   }
 
@@ -3381,3 +3274,1526 @@ extension EventModelQueryProperty
     });
   }
 }
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+extension GetDailyReportCollection on Isar {
+  IsarCollection<DailyReport> get dailyReports => this.collection();
+}
+
+const DailyReportSchema = CollectionSchema(
+  name: r'DailyReport',
+  id: -3611253067269952573,
+  properties: {
+    r'date': PropertySchema(
+      id: 0,
+      name: r'date',
+      type: IsarType.dateTime,
+    ),
+    r'events': PropertySchema(
+      id: 1,
+      name: r'events',
+      type: IsarType.objectList,
+      target: r'EventReport',
+    ),
+    r'geofenceName': PropertySchema(
+      id: 2,
+      name: r'geofenceName',
+      type: IsarType.string,
+    )
+  },
+  estimateSize: _dailyReportEstimateSize,
+  serialize: _dailyReportSerialize,
+  deserialize: _dailyReportDeserialize,
+  deserializeProp: _dailyReportDeserializeProp,
+  idName: r'id',
+  indexes: {},
+  links: {},
+  embeddedSchemas: {r'EventReport': EventReportSchema},
+  getId: _dailyReportGetId,
+  getLinks: _dailyReportGetLinks,
+  attach: _dailyReportAttach,
+  version: '3.1.0+1',
+);
+
+int _dailyReportEstimateSize(
+  DailyReport object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  bytesCount += 3 + object.events.length * 3;
+  {
+    final offsets = allOffsets[EventReport]!;
+    for (var i = 0; i < object.events.length; i++) {
+      final value = object.events[i];
+      bytesCount += EventReportSchema.estimateSize(value, offsets, allOffsets);
+    }
+  }
+  bytesCount += 3 + object.geofenceName.length * 3;
+  return bytesCount;
+}
+
+void _dailyReportSerialize(
+  DailyReport object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeDateTime(offsets[0], object.date);
+  writer.writeObjectList<EventReport>(
+    offsets[1],
+    allOffsets,
+    EventReportSchema.serialize,
+    object.events,
+  );
+  writer.writeString(offsets[2], object.geofenceName);
+}
+
+DailyReport _dailyReportDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = DailyReport(
+    date: reader.readDateTime(offsets[0]),
+    events: reader.readObjectList<EventReport>(
+          offsets[1],
+          EventReportSchema.deserialize,
+          allOffsets,
+          EventReport(),
+        ) ??
+        const [],
+    geofenceName: reader.readString(offsets[2]),
+  );
+  object.id = id;
+  return object;
+}
+
+P _dailyReportDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readDateTime(offset)) as P;
+    case 1:
+      return (reader.readObjectList<EventReport>(
+            offset,
+            EventReportSchema.deserialize,
+            allOffsets,
+            EventReport(),
+          ) ??
+          const []) as P;
+    case 2:
+      return (reader.readString(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+Id _dailyReportGetId(DailyReport object) {
+  return object.id;
+}
+
+List<IsarLinkBase<dynamic>> _dailyReportGetLinks(DailyReport object) {
+  return [];
+}
+
+void _dailyReportAttach(
+    IsarCollection<dynamic> col, Id id, DailyReport object) {
+  object.id = id;
+}
+
+extension DailyReportQueryWhereSort
+    on QueryBuilder<DailyReport, DailyReport, QWhere> {
+  QueryBuilder<DailyReport, DailyReport, QAfterWhere> anyId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+}
+
+extension DailyReportQueryWhere
+    on QueryBuilder<DailyReport, DailyReport, QWhereClause> {
+  QueryBuilder<DailyReport, DailyReport, QAfterWhereClause> idEqualTo(Id id) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(
+        lower: id,
+        upper: id,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterWhereClause> idNotEqualTo(
+      Id id) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            )
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            )
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterWhereClause> idGreaterThan(Id id,
+      {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.greaterThan(lower: id, includeLower: include),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterWhereClause> idLessThan(Id id,
+      {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.lessThan(upper: id, includeUpper: include),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterWhereClause> idBetween(
+    Id lowerId,
+    Id upperId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(
+        lower: lowerId,
+        includeLower: includeLower,
+        upper: upperId,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+}
+
+extension DailyReportQueryFilter
+    on QueryBuilder<DailyReport, DailyReport, QFilterCondition> {
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition> dateEqualTo(
+      DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'date',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition> dateGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'date',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition> dateLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'date',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition> dateBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'date',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      eventsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'events',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      eventsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'events',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      eventsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'events',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      eventsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'events',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      eventsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'events',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      eventsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'events',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      geofenceNameEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'geofenceName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      geofenceNameGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'geofenceName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      geofenceNameLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'geofenceName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      geofenceNameBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'geofenceName',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      geofenceNameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'geofenceName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      geofenceNameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'geofenceName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      geofenceNameContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'geofenceName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      geofenceNameMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'geofenceName',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      geofenceNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'geofenceName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition>
+      geofenceNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'geofenceName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition> idEqualTo(
+      Id value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition> idGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition> idLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'id',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition> idBetween(
+    Id lower,
+    Id upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+}
+
+extension DailyReportQueryObject
+    on QueryBuilder<DailyReport, DailyReport, QFilterCondition> {
+  QueryBuilder<DailyReport, DailyReport, QAfterFilterCondition> eventsElement(
+      FilterQuery<EventReport> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'events');
+    });
+  }
+}
+
+extension DailyReportQueryLinks
+    on QueryBuilder<DailyReport, DailyReport, QFilterCondition> {}
+
+extension DailyReportQuerySortBy
+    on QueryBuilder<DailyReport, DailyReport, QSortBy> {
+  QueryBuilder<DailyReport, DailyReport, QAfterSortBy> sortByDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'date', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterSortBy> sortByDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'date', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterSortBy> sortByGeofenceName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'geofenceName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterSortBy>
+      sortByGeofenceNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'geofenceName', Sort.desc);
+    });
+  }
+}
+
+extension DailyReportQuerySortThenBy
+    on QueryBuilder<DailyReport, DailyReport, QSortThenBy> {
+  QueryBuilder<DailyReport, DailyReport, QAfterSortBy> thenByDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'date', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterSortBy> thenByDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'date', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterSortBy> thenByGeofenceName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'geofenceName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterSortBy>
+      thenByGeofenceNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'geofenceName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterSortBy> thenById() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QAfterSortBy> thenByIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+}
+
+extension DailyReportQueryWhereDistinct
+    on QueryBuilder<DailyReport, DailyReport, QDistinct> {
+  QueryBuilder<DailyReport, DailyReport, QDistinct> distinctByDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'date');
+    });
+  }
+
+  QueryBuilder<DailyReport, DailyReport, QDistinct> distinctByGeofenceName(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'geofenceName', caseSensitive: caseSensitive);
+    });
+  }
+}
+
+extension DailyReportQueryProperty
+    on QueryBuilder<DailyReport, DailyReport, QQueryProperty> {
+  QueryBuilder<DailyReport, int, QQueryOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<DailyReport, DateTime, QQueryOperations> dateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'date');
+    });
+  }
+
+  QueryBuilder<DailyReport, List<EventReport>, QQueryOperations>
+      eventsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'events');
+    });
+  }
+
+  QueryBuilder<DailyReport, String, QQueryOperations> geofenceNameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'geofenceName');
+    });
+  }
+}
+
+// **************************************************************************
+// IsarEmbeddedGenerator
+// **************************************************************************
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+const EventReportSchema = Schema(
+  name: r'EventReport',
+  id: -4380174223695169168,
+  properties: {
+    r'entryTime': PropertySchema(
+      id: 0,
+      name: r'entryTime',
+      type: IsarType.dateTime,
+    ),
+    r'eventName': PropertySchema(
+      id: 1,
+      name: r'eventName',
+      type: IsarType.string,
+    ),
+    r'exitTime': PropertySchema(
+      id: 2,
+      name: r'exitTime',
+      type: IsarType.dateTime,
+    ),
+    r'lateness': PropertySchema(
+      id: 3,
+      name: r'lateness',
+      type: IsarType.long,
+    ),
+    r'punctuality': PropertySchema(
+      id: 4,
+      name: r'punctuality',
+      type: IsarType.string,
+    ),
+    r'scheduledEndTime': PropertySchema(
+      id: 5,
+      name: r'scheduledEndTime',
+      type: IsarType.dateTime,
+    ),
+    r'scheduledStartTime': PropertySchema(
+      id: 6,
+      name: r'scheduledStartTime',
+      type: IsarType.dateTime,
+    ),
+    r'timeSpent': PropertySchema(
+      id: 7,
+      name: r'timeSpent',
+      type: IsarType.long,
+    )
+  },
+  estimateSize: _eventReportEstimateSize,
+  serialize: _eventReportSerialize,
+  deserialize: _eventReportDeserialize,
+  deserializeProp: _eventReportDeserializeProp,
+);
+
+int _eventReportEstimateSize(
+  EventReport object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  bytesCount += 3 + object.eventName.length * 3;
+  bytesCount += 3 + object.punctuality.length * 3;
+  return bytesCount;
+}
+
+void _eventReportSerialize(
+  EventReport object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeDateTime(offsets[0], object.entryTime);
+  writer.writeString(offsets[1], object.eventName);
+  writer.writeDateTime(offsets[2], object.exitTime);
+  writer.writeLong(offsets[3], object.lateness);
+  writer.writeString(offsets[4], object.punctuality);
+  writer.writeDateTime(offsets[5], object.scheduledEndTime);
+  writer.writeDateTime(offsets[6], object.scheduledStartTime);
+  writer.writeLong(offsets[7], object.timeSpent);
+}
+
+EventReport _eventReportDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = EventReport(
+    entryTime: reader.readDateTimeOrNull(offsets[0]),
+    eventName: reader.readStringOrNull(offsets[1]) ?? '',
+    exitTime: reader.readDateTimeOrNull(offsets[2]),
+    lateness: reader.readLongOrNull(offsets[3]),
+    punctuality: reader.readStringOrNull(offsets[4]) ?? '',
+    scheduledEndTime: reader.readDateTimeOrNull(offsets[5]),
+    scheduledStartTime: reader.readDateTimeOrNull(offsets[6]),
+    timeSpent: reader.readLongOrNull(offsets[7]),
+  );
+  return object;
+}
+
+P _eventReportDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 1:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 2:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 3:
+      return (reader.readLongOrNull(offset)) as P;
+    case 4:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 5:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 6:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 7:
+      return (reader.readLongOrNull(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+extension EventReportQueryFilter
+    on QueryBuilder<EventReport, EventReport, QFilterCondition> {
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      entryTimeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'entryTime',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      entryTimeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'entryTime',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      entryTimeEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'entryTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      entryTimeGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'entryTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      entryTimeLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'entryTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      entryTimeBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'entryTime',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      eventNameEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'eventName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      eventNameGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'eventName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      eventNameLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'eventName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      eventNameBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'eventName',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      eventNameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'eventName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      eventNameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'eventName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      eventNameContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'eventName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      eventNameMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'eventName',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      eventNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'eventName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      eventNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'eventName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      exitTimeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'exitTime',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      exitTimeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'exitTime',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition> exitTimeEqualTo(
+      DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'exitTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      exitTimeGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'exitTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      exitTimeLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'exitTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition> exitTimeBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'exitTime',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      latenessIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'lateness',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      latenessIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'lateness',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition> latenessEqualTo(
+      int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lateness',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      latenessGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lateness',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      latenessLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lateness',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition> latenessBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lateness',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      punctualityEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'punctuality',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      punctualityGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'punctuality',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      punctualityLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'punctuality',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      punctualityBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'punctuality',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      punctualityStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'punctuality',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      punctualityEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'punctuality',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      punctualityContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'punctuality',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      punctualityMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'punctuality',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      punctualityIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'punctuality',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      punctualityIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'punctuality',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      scheduledEndTimeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'scheduledEndTime',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      scheduledEndTimeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'scheduledEndTime',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      scheduledEndTimeEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'scheduledEndTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      scheduledEndTimeGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'scheduledEndTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      scheduledEndTimeLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'scheduledEndTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      scheduledEndTimeBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'scheduledEndTime',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      scheduledStartTimeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'scheduledStartTime',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      scheduledStartTimeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'scheduledStartTime',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      scheduledStartTimeEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'scheduledStartTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      scheduledStartTimeGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'scheduledStartTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      scheduledStartTimeLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'scheduledStartTime',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      scheduledStartTimeBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'scheduledStartTime',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      timeSpentIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'timeSpent',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      timeSpentIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'timeSpent',
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      timeSpentEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'timeSpent',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      timeSpentGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'timeSpent',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      timeSpentLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'timeSpent',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<EventReport, EventReport, QAfterFilterCondition>
+      timeSpentBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'timeSpent',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+}
+
+extension EventReportQueryObject
+    on QueryBuilder<EventReport, EventReport, QFilterCondition> {}

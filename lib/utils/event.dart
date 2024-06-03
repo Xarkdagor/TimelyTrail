@@ -78,4 +78,5 @@ enum PunctualityStatus {
   onTime,
   late,
   notArrived, // For events that haven't started yet
+  leftEarly, // User left before the scheduled end time
 }

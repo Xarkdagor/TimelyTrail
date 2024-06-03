@@ -7,8 +7,8 @@ import 'package:fl_location/fl_location.dart';
 import 'package:flutter/material.dart';
 import 'package:geo_chronicle/database/geofences.dart'; // Import your database file
 import 'package:geo_chronicle/database/geofences_database.dart';
+import 'package:geo_chronicle/utils/event.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -167,57 +167,77 @@ class _MapsState extends State<Maps> {
         closestDistance < (closestGeofence.radius ?? 0.0)) {
       // User is inside a geofence
 
-      if (_isInsideGeofence[closestGeofence.id] != true) {
-        // New geofence entry
-
+      if (!_isInsideGeofence.containsKey(closestGeofence.id) ||
+          !_isInsideGeofence[closestGeofence.id]!) {
+        // New geofence entry or re-entry after exit
         closestGeofence.entryTimestamp = DateTime.now();
 
-        // Fetch events for the geofence
-        final events =
-            await GeofencesDatabase.getEventsForGeofence(closestGeofence.id);
-        for (final event in events) {
-          // Check if the current time falls within the event's start and end times
-          if (DateTime.now().isAfter(event.startTime) &&
-              DateTime.now().isBefore(event.endTime)) {
-            // User entered during a scheduled event
-            final isOnTime = DateTime.now().isBefore(event.startTime);
-            await GeofencesDatabase.updateEventPunctuality(
-                event.id, closestGeofence.entryTimestamp);
-            log('Updated punctuality for event "${event.title}": $isOnTime');
-            break; // Assuming only one event at a time
-          }
-        }
-
+        // Show SnackBar on entering a geofence
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Entered geofence: ${closestGeofence.name}')),
+        );
+        log('Entered Geofence "${closestGeofence.name}" at ${DateTime.now()}');
         _isInsideGeofence[closestGeofence.id] = true;
-        _startTimer();
-      }
 
-      closestGeofence.sessionTimeSpentInSeconds++;
-      _saveTimerState(closestGeofence);
+        _fetchEventsAndStartTimer(closestGeofence);
+      }
     } else {
-      // User was inside and has exited or is outside the range
-      if (_isInsideGeofence[closestGeofence!.id] == true &&
-          closestGeofence.entryTimestamp != null) {
+      // User is outside the geofence
+      if (closestGeofence != null &&
+          _isInsideGeofence.containsKey(closestGeofence.id) &&
+          _isInsideGeofence[closestGeofence.id]!) {
+        // User was inside and has exited
+        log('Exited Geofence "${closestGeofence.name}" at ${DateTime.now()}');
+        // Show SnackBar on exiting a geofence
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Exited geofence: ${closestGeofence.name}')),
+        );
+        // Stop the timer
+        _stopTimer();
+
         closestGeofence.exitTimestamp = DateTime.now();
 
-        // Debugging: Print statement (conditionally)
-        if (closestGeofence.exitTimestamp != null) {
-          String formattedExitTime = DateFormat('dd-MM-yyyy HH:mm:ss')
-              .format(closestGeofence.exitTimestamp!);
-          log('Exited Geofence "${closestGeofence.name}" at $formattedExitTime');
+        // Calculate and update the total time spent for the geofence
+        if (closestGeofence.entryTimestamp != null) {
+          final duration = closestGeofence.exitTimestamp!
+              .difference(closestGeofence.entryTimestamp!);
+          closestGeofence.totalTimeSpentInSeconds += duration.inSeconds;
         }
 
-        closestGeofence.totalTimeSpentInSeconds += closestGeofence
-            .sessionTimeSpentInSeconds; // Add session time to total
-        closestGeofence.sessionTimeSpentInSeconds = 0; // Reset session time
+        // Update the geofence in the database
+        GeofencesDatabase.updateGeofence(closestGeofence);
 
-        GeofencesDatabase.updateGeofence(closestGeofence); // Update in database
-
+        // Reset session time and timer state
+        closestGeofence.sessionTimeSpentInSeconds = 0;
         _isInsideGeofence[closestGeofence.id] = false;
-        _stopTimer();
-        _clearTimerState();
       }
     }
+  }
+
+  // Helper function to fetch events and start timer (modified)
+  Future<void> _fetchEventsAndStartTimer(Geofences closestGeofence) async {
+    final events =
+        await GeofencesDatabase.getEventsForGeofence(closestGeofence.id);
+    for (final event in events) {
+      if (DateTime.now().isAfter(event.startTime) &&
+          DateTime.now().isBefore(event.endTime)) {
+        final isOnTime = DateTime.now().isBefore(event.startTime);
+        await GeofencesDatabase.updateEventPunctuality(
+            event.id, closestGeofence.entryTimestamp);
+        log('Updated punctuality for event "${event.title}": $isOnTime');
+
+        // Check if the user exited early
+        if (closestGeofence.exitTimestamp != null &&
+            closestGeofence.exitTimestamp!.isBefore(event.endTime)) {
+          event.punctuality = PunctualityStatus.leftEarly;
+          await GeofencesDatabase.updateEventPunctuality(event.id, null);
+        }
+
+        break; // Assuming only one event at a time
+      }
+    }
+
+    _startTimer(); // Start timer only if inside a geofence during an event
   }
 
   void _startTimer() {
@@ -250,6 +270,7 @@ class _MapsState extends State<Maps> {
     prefs.setString(
         'entryTimestamp', geofence.entryTimestamp!.toIso8601String());
     prefs.setInt('elapsedTime', _elapsedTime);
+    log('Timer state saved for geofence ${geofence.id}');
   }
 
   void _clearTimerState() async {
@@ -257,6 +278,7 @@ class _MapsState extends State<Maps> {
     prefs.remove('activeGeofenceId');
     prefs.remove('entryTimestamp');
     prefs.remove('elapsedTime');
+    log('Timer state cleared');
   }
 
   double haversineDistance(LatLng player1, LatLng player2) {

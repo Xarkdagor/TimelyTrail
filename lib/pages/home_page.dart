@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geo_chronicle/pages/geofencing_page.dart';
 import 'package:geo_chronicle/pages/home_page_content.dart';
 import 'package:geo_chronicle/pages/locations_page.dart';
+import 'package:geo_chronicle/pages/report.dart';
 import 'package:geo_chronicle/pages/schedule_page.dart';
 import 'package:geo_chronicle/utils/bottom_nav_bar.dart';
 
@@ -26,7 +27,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _pages = [
     // Home page content (replace with your actual widget)
-    HomePageContent(),
+    const HomePageContent(),
     const SchedulePage(),
     const GeofencingPage(),
     const LocationsPage(),
@@ -38,7 +39,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Padding(
           padding: EdgeInsets.symmetric(horizontal: 75),
-          child: Text("GeoChronicle"),
+          child: Text("TimelyTrail"),
         ),
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -87,6 +88,21 @@ class _HomePageState extends State<HomePage> {
                     size: 35,
                   ),
                   title: Text("Home"),
+                  iconColor: Colors.white,
+                  textColor: Colors.white,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: ListTile(
+                  leading: IconButton(
+                    onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const UserReport())),
+                    icon: const Icon(Icons.notes_outlined),
+                  ),
+                  title: const Text("Report"),
                   iconColor: Colors.white,
                   textColor: Colors.white,
                 ),

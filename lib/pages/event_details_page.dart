@@ -14,15 +14,14 @@ class EventDetailsPage extends StatelessWidget {
         title: Text(event.title),
       ),
       body: SingleChildScrollView(
-        // To allow scrolling if content overflows
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Title Card
               Card(
-                // Use a Card for a visually distinct container
-                elevation: 2.0, // Add some elevation
+                elevation: 2.0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
@@ -46,18 +45,55 @@ class EventDetailsPage extends StatelessWidget {
                       if (event.recurrenceDays != null)
                         _buildDetailRow('Recurrence Days:',
                             event.recurrenceDays!.join(', ')),
-                      _buildDetailRow(
-                          'Entry Time:', _formatEntryTime(event.entryTime)),
-                      _buildDetailRowWithIcon(
-                          'Punctuality:',
-                          _getPunctualityString(event),
-                          _getPunctualityIcon(
-                              event) // Add icon based on punctuality
-                          ),
                     ],
                   ),
                 ),
               ),
+
+              // Punctuality Card
+              Card(
+                elevation: 2.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                color: _getPunctualityColor(
+                    event), // Set card color based on punctuality
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: _buildDetailRowWithIcon(
+                    'Punctuality:',
+                    _getPunctualityString(event),
+                    _getPunctualityIcon(event),
+                  ),
+                ),
+              ),
+
+              // Entry/Exit Time Card (only if entered)
+              if (event.entryTime != null)
+                Card(
+                  elevation: 2.0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildDetailRow(
+                            'Entry Time:',
+                            _formatEntryTime(event
+                                .entryTime)), // Use _formatEntryTime() to format the time
+                        if (event.punctuality != PunctualityStatus.notArrived)
+                          _buildDetailRow(
+                              'Lateness:',
+                              _calculateLateness(
+                                      event.entryTime!, event.startTime)
+                                  .toString()),
+                      ],
+                    ),
+                  ),
+                )
             ],
           ),
         ),
@@ -83,6 +119,8 @@ class EventDetailsPage extends StatelessWidget {
         return 'Late';
       case PunctualityStatus.notArrived:
         return 'Not Arrived Yet';
+      case PunctualityStatus.leftEarly:
+        return 'Left Early';
     }
   }
 }
@@ -136,5 +174,29 @@ IconData _getPunctualityIcon(Event event) {
       return Icons.warning_amber_outlined; // Warning icon
     default:
       return Icons.access_time; // Default clock icon
+  }
+}
+
+Duration _calculateLateness(DateTime entryTime, DateTime startTime) {
+  if (entryTime.isAfter(startTime)) {
+    return entryTime.difference(startTime);
+  } else {
+    return Duration.zero; // Not late
+  }
+}
+
+//Function for getting color according to punctuality
+Color _getPunctualityColor(Event event) {
+  switch (event.punctuality) {
+    case PunctualityStatus.early:
+      return Colors.green[100]!;
+    case PunctualityStatus.onTime:
+      return Colors.yellow[100]!;
+    case PunctualityStatus.late:
+      return Colors.red[100]!;
+    case PunctualityStatus.leftEarly:
+      return Colors.orange[100]!;
+    default:
+      return Colors.grey[200]!; // Default color for 'Not Arrived Yet'
   }
 }

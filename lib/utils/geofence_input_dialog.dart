@@ -124,7 +124,6 @@ class _GeoFenceInputDialogState extends State<GeoFenceInputDialog> {
                   color: _generateRandomColor().value,
                   entryTimestamp: null,
                   exitTimestamp: null,
-                  dailyTimeSpentInSeconds: 0,
                   category: selectedCategory);
 
               await GeofencesDatabase().createGeofence(newGeoFence);

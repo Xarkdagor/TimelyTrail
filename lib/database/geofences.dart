@@ -14,7 +14,7 @@ class Geofences {
 
   int totalTimeSpentInSeconds = 0;
   int sessionTimeSpentInSeconds = 0;
-  int dailyTimeSpentInSeconds = 0;
+
   // Add a category field
   String? category;
 
@@ -30,7 +30,6 @@ class Geofences {
     this.exitTimestamp,
     this.category,
     this.radius,
-    required this.dailyTimeSpentInSeconds,
   });
 
   String getFormattedDailyDuration() {
@@ -71,5 +70,42 @@ class EventModel {
     this.isRecurring = false,
     this.recurrenceRule,
     this.recurrenceDays,
+  });
+}
+
+@Collection()
+class DailyReport {
+  Id id = Isar.autoIncrement;
+  String geofenceName;
+  DateTime date;
+  List<EventReport> events = [];
+
+  DailyReport({
+    required this.geofenceName,
+    required this.date,
+    this.events = const [],
+  });
+}
+
+@Embedded() // This class will be embedded inside DailyReport
+class EventReport {
+  String eventName;
+  DateTime? scheduledStartTime;
+  DateTime? entryTime;
+  DateTime? exitTime;
+  String punctuality;
+  int? timeSpent;
+  int? lateness;
+  DateTime? scheduledEndTime; // Add scheduledEndTime here
+
+  EventReport({
+    this.eventName = '',
+    this.scheduledStartTime,
+    this.entryTime,
+    this.exitTime,
+    this.punctuality = '',
+    this.timeSpent = 0,
+    this.lateness = 0,
+    this.scheduledEndTime, // Add it to the constructor as well
   });
 }

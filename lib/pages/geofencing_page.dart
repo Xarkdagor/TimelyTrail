@@ -31,7 +31,7 @@ class _GeofencingPageState extends State<GeofencingPage> {
 
   // Function to create geofences
   void createGeofences(BuildContext context) async {
-    print('Entering createGeofences()');
+    log('Entering createGeofences()');
     final result = await showDialog<Geofences>(
       // Updated return type
       context: context,
@@ -42,7 +42,7 @@ class _GeofencingPageState extends State<GeofencingPage> {
     if (result != null) {
       // 1. Save the geo-fence to the database
       try {
-        print('Attempting to save geo-fence');
+        log('Attempting to save geo-fence');
         final geofencesDatabase =
             GeofencesDatabase(); // Instantiate GeofencesDatabase
         await geofencesDatabase

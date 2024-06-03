@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geo_chronicle/pages/home_page.dart';
 
-class StartingPage extends StatelessWidget {
+class StartingPage extends StatefulWidget {
   const StartingPage({super.key});
+
+  @override
+  _StartingPageState createState() => _StartingPageState();
+}
+
+class _StartingPageState extends State<StartingPage> {
+  bool _isPressed = false;
 
   @override
   Widget build(context) {
@@ -16,7 +23,6 @@ class StartingPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // logo
-
               SvgPicture.asset(
                 "assets/earth.svg",
                 height: 150,
@@ -29,7 +35,7 @@ class StartingPage extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.all(24.0),
                 child: Text(
-                  'GeoChronicle',
+                  'TimelyTrail',
                   style: TextStyle(
                       color: Color.fromARGB(255, 97, 94, 182),
                       fontSize: 26,
@@ -45,7 +51,7 @@ class StartingPage extends StatelessWidget {
                 padding: EdgeInsets.all(24.0),
                 child: Text(
                   textAlign: TextAlign.center,
-                  '"Chart your journey, chronicle your time"',
+                  '"Your time, your trail, your triumph"',
                   style: TextStyle(
                       color: Color.fromARGB(255, 131, 130, 130), fontSize: 20),
                 ),
@@ -58,20 +64,32 @@ class StartingPage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: GestureDetector(
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const HomePage())),
-                  child: Container(
-                    width: 220,
-                    padding: const EdgeInsets.all(20),
+                  onTap: () {
+                    setState(() {
+                      _isPressed = true;
+                    });
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const HomePage()));
+                    });
+                  },
+                  child: AnimatedContainer(
+                    width: _isPressed ? 240 : 220,
+                    height: _isPressed ? 70 : 60,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
                     decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 49, 18, 77),
-                        borderRadius: BorderRadius.circular(15)),
-                    child: const Text(
-                      "Start",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20, color: Colors.white),
+                      color: const Color.fromARGB(255, 49, 18, 77),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        "Start",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 20, color: Colors.white),
+                      ),
                     ),
                   ),
                 ),

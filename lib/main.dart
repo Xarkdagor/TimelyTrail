@@ -6,7 +6,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //
   await GeofencesDatabase.initialize();
+
   await GeofencesDatabase.addPredefinedGeofences();
+  await GeofencesDatabase.addDummyDataToDatabase();
+
   runApp(const MyApp());
 }
 
