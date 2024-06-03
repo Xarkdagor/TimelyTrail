@@ -15,7 +15,7 @@ TimelyTrail is here to help you gain valuable insights into your daily routines 
 *   **Smart Scheduling:**  Effortlessly create, edit, and import your schedule directly into the app. TimelyTrail's intuitive interface makes it a breeze to plan your day, week, or month.
 *   **Automatic Time Tracking:**  TimelyTrail leverages geofencing technology to automatically track the time you spend at different locations (e.g., home, work, school, gym).
 *   **Punctuality Analysis:**  Get detailed feedback on your punctuality for every event. See if you're arriving on time, early, or late, and identify patterns to improve your time management skills.
-*   **Comprehensive Reports:**  Generate insightful reports in CSV format.  Analyze your time usage, punctuality trends, and identify areas where you can optimize your schedule.
+*   **Comprehensive Reports:**  Generate insightful reports in CSV format.  Analyze your time usage, and punctuality trends, and identify areas where you can optimize your schedule.
 
 ## ✨ Why Choose TimelyTrail?
 
@@ -57,7 +57,7 @@ TimelyTrail is here to help you gain valuable insights into your daily routines 
 
 ## 📞 Contact
 
-Have questions or feedback?  Feel free to reach out to us:
+Have questions or feedback?  Feel free to reach out to me:
 
 *   **Developer's LinkedIn:**  https://www.linkedin.com/in/sameer-kaushik-a229b22bb/
 *   **Email:** sameerkaushik170@gmail.com
