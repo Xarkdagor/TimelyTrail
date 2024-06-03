@@ -1,7 +1,7 @@
 # TimelyTrail: Your Path to Punctuality and Productivity ⏰🗺️
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/your_twitter_handle?style=social)](https://twitter.com/your_twitter_handle)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin&style=flat)](https://www.linkedin.com/in/YOUR_LINKEDIN_USERNAME/)
+[![Twitter Follow](https://img.shields.io/twitter/follow/your_twitter_handle?style=social)](https://x.com/Xarkdagor)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin&style=flat)](https://www.linkedin.com/in/sameer-kaushik-a229b22bb/)
 
 **Own your time, own your life.**  TimelyTrail is the ultimate time management and punctuality companion designed for students and professionals who want to take charge of their schedules and make every minute count.
 
@@ -25,10 +25,13 @@ TimelyTrail is here to help you gain valuable insights into your daily routines 
 *   **Privacy-Focused:** Your data stays on your device. We respect your privacy.
 
 ## 📸 Screenshots
+![start_202x400](https://github.com/Xarkdagor/TimelyTrail/assets/110737967/344a102e-e94a-4922-b2ed-c484a29bbde0)
+![WhatsApp_Image_2024-06-03_at_15 41 12_202x400](https://github.com/Xarkdagor/TimelyTrail/assets/110737967/80cd665e-1de2-49ed-b043-f00817616efe)
+![event_202x400](https://github.com/Xarkdagor/TimelyTrail/assets/110737967/1179aaac-7a9c-4dd5-95d3-28bbbedac88b)
+![geof_202x400](https://github.com/Xarkdagor/TimelyTrail/assets/110737967/252a821e-790e-4785-b7a2-2f9cba578d53)
+![loca_202x400](https://github.com/Xarkdagor/TimelyTrail/assets/110737967/50226988-682b-4c4b-932c-006a05339420)
 
-[Image of App Screenshot 1]
-[Image of App Screenshot 2]
-[Image of App Screenshot 3]
+
 
 ## 🚀 Getting Started
 
@@ -36,20 +39,30 @@ TimelyTrail is here to help you gain valuable insights into your daily routines 
 2.  **Install dependencies:** `flutter pub get`
 3.  **Run the app:** `flutter run`
 
+
+## Technologies/Packages Used:
+
+*   Flutter
+*   Google Maps
+*   Isar (database)
+*   Table Calendar
+*   syncfusion_flutter_xlsio (For Excel sheet)
+*   fl_location
+*   intl
+*   path_provider
+*   open_file
+
 ## 🤝 How to Contribute
 
 We welcome contributions from the community! If you have any ideas, bug reports, or feature requests, please open an issue or submit a pull request.
 
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
 ## 📞 Contact
 
 Have questions or feedback?  Feel free to reach out to us:
 
-*   **Developer's LinkedIn:**  [Your LinkedIn Profile URL]
-*   **Email:** [Your Email Address]
+*   **Developer's LinkedIn:**  https://www.linkedin.com/in/sameer-kaushik-a229b22bb/
+*   **Email:** sameerkaushik170@gmail.com
 
 ## 📢 Spread the Word
 
