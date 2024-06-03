@@ -35,7 +35,7 @@ TimelyTrail is here to help you gain valuable insights into your daily routines 
 
 ## 🚀 Getting Started
 
-1.  **Clone the repository:** `git clone https://github.com/Xarkdagor/GeoChronicle.git`
+1.  **Clone the repository:** `git clone https://github.com/Xarkdagor/TimelyTrail.git`
 2.  **Install dependencies:** `flutter pub get`
 3.  **Run the app:** `flutter run`
 
