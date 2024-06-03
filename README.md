@@ -52,9 +52,7 @@ TimelyTrail is here to help you gain valuable insights into your daily routines 
 *   path_provider
 *   open_file
 
-## 🤝 How to Contribute
 
-We welcome contributions from the community! If you have any ideas, bug reports, or feature requests, please open an issue or submit a pull request.
 
 
 ## 📞 Contact
