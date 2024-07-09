@@ -19,6 +19,8 @@ class _GeoFenceInputDialogState extends State<GeoFenceInputDialog> {
   final _longitudeController = TextEditingController();
   final _radiusController = TextEditingController();
 
+  bool _isLoading = false;
+
   Color _generateRandomColor() {
     return Color.fromARGB(
       255, // Alpha (full opacity)
@@ -40,8 +42,10 @@ class _GeoFenceInputDialogState extends State<GeoFenceInputDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Colors.purple[100],
-      title: const Text('Create Geofence'),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      backgroundColor: Colors.purple[50],
+      title: const Text('Create Geofence',
+          style: TextStyle(fontWeight: FontWeight.bold)),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -53,11 +57,11 @@ class _GeoFenceInputDialogState extends State<GeoFenceInputDialog> {
                 NameTextFormField(
                   controller: _nameController,
                 ),
-                const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+                const SizedBox(height: 10),
                 LatitudeTextFormField(controller: _latitudeController),
-                const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+                const SizedBox(height: 10),
                 LongitudeTextFormField(controller: _longitudeController),
-                const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+                const SizedBox(height: 10),
                 DropdownButtonFormField<String?>(
                   // Changed to String?
                   decoration: InputDecoration(
@@ -79,8 +83,7 @@ class _GeoFenceInputDialogState extends State<GeoFenceInputDialog> {
                     });
                   },
                 ),
-                const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
-                // Use a Conditional Widget (e.g., if statement)
+                const SizedBox(height: 10),
                 if (selectedCategory == null)
                   RadiusTextFormField(controller: _radiusController)
                 else
@@ -96,53 +99,82 @@ class _GeoFenceInputDialogState extends State<GeoFenceInputDialog> {
           child: const Text(
             'Cancel',
             style: TextStyle(
-              color: Color.fromARGB(255, 67, 34, 178),
+              color: Colors.deepPurple,
               fontSize: 16,
             ),
           ),
         ),
         ElevatedButton(
-          onPressed: () async {
-            if (!_formKey.currentState!.validate()) {
-              return; // Early exit if validation fails
-            }
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.deepPurple,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+          onPressed: _isLoading
+              ? null
+              : () async {
+                  if (!_formKey.currentState!.validate()) {
+                    return; // Early exit if validation fails
+                  }
 
-            try {
-              double latitude = double.parse(_latitudeController.text);
-              double longitude = double.parse(_longitudeController.text);
-              double? radius;
+                  setState(() {
+                    _isLoading = true;
+                  });
 
-              if (selectedCategory == null) {
-                radius = double.parse(_radiusController.text);
-              }
+                  try {
+                    double latitude = double.parse(_latitudeController.text);
+                    double longitude = double.parse(_longitudeController.text);
+                    double? radius;
 
-              var newGeoFence = Geofences(
-                  name: _nameController.text,
-                  latitude: latitude,
-                  longitude: longitude,
-                  radius: radius, // Could be null if the category is selected
-                  color: _generateRandomColor().value,
-                  entryTimestamp: null,
-                  exitTimestamp: null,
-                  category: selectedCategory);
+                    if (selectedCategory == null) {
+                      radius = double.parse(_radiusController.text);
+                    }
 
-              await GeofencesDatabase().createGeofence(newGeoFence);
+                    var newGeoFence = Geofences(
+                      name: _nameController.text,
+                      latitude: latitude,
+                      longitude: longitude,
+                      radius:
+                          radius, // Could be null if the category is selected
+                      color: _generateRandomColor().value,
+                      entryTimestamp: null,
+                      exitTimestamp: null,
+                      category: selectedCategory,
+                    );
 
-              _nameController.clear();
-              _latitudeController.clear();
-              _longitudeController.clear();
-              _radiusController.clear();
-              selectedCategory = null; // Reset category selection
-              setState(() {}); // Update the UI if needed
+                    await GeofencesDatabase().createGeofence(newGeoFence);
 
-              Navigator.of(context).pop(); // Close the dialog
-            } catch (error) {
-              log('Error creating Geofence: $error');
-              ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Error creating geofence')));
-            }
-          },
-          child: const Text('Create'),
+                    _nameController.clear();
+                    _latitudeController.clear();
+                    _longitudeController.clear();
+                    _radiusController.clear();
+                    selectedCategory = null; // Reset category selection
+
+                    Navigator.of(context).pop(); // Close the dialog
+                  } catch (error) {
+                    log('Error creating Geofence: $error');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Error creating geofence')),
+                    );
+                  } finally {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                  }
+                },
+          child: _isLoading
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : const Text('Create'),
         ),
       ],
     );
@@ -160,6 +192,7 @@ class NameTextFormField extends StatelessWidget {
       controller: controller,
       decoration: InputDecoration(
         labelText: 'Name',
+        prefixIcon: const Icon(Icons.label),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -187,6 +220,7 @@ class LatitudeTextFormField extends StatelessWidget {
           decimal: true, signed: true), // Numeric keyboard
       decoration: InputDecoration(
         labelText: 'Latitude',
+        prefixIcon: const Icon(Icons.map),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -218,6 +252,7 @@ class LongitudeTextFormField extends StatelessWidget {
           const TextInputType.numberWithOptions(decimal: true, signed: true),
       decoration: InputDecoration(
         labelText: 'Longitude',
+        prefixIcon: const Icon(Icons.map_outlined),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -248,6 +283,7 @@ class RadiusTextFormField extends StatelessWidget {
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(
         labelText: 'Radius (meters)',
+        prefixIcon: const Icon(Icons.circle),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),
